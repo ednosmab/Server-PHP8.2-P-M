@@ -1,0 +1,50 @@
+version: "3.1"
+services:
+  www_edson:
+    container_name: www_edson
+    build: .
+    ports:
+      - 8085:80
+    volumes:
+      - ./:/var/www/html/
+    links:
+      - db_edson
+    networks:
+      - edsonnet
+  db_edson:
+    container_name: db_edson
+    image: mysql:5.7.16
+    ports:
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_HOST: localhost
+      MYSQL_DATABASE: edsondb
+      MYSQL_USER: edson
+      MYSQL_PASSWORD: 'r123456'
+      MYSQL_ROOT_HOST: '%' 
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./mysql-data/:/var/lib/mysql
+    networks:
+      - edsonnet
+  phpmyadmin_edson:
+    container_name: phpmyadmin_edson
+    image: phpmyadmin/phpmyadmin
+    links:
+      - db_edson:db
+    ports:
+      - 8095:80
+    environment:
+      MYSQL_USER: edson
+      MYSQL_PASSWORD: 'r123456'
+      MYSQL_ROOT_HOST: '%' 
+      MYSQL_ROOT_PASSWORD: root
+    depends_on:
+      - db_edson
+    networks:
+      - edsonnet
+      
+networks:
+  edsonnet:
+    driver: bridge
